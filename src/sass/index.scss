@@ -5,9 +5,9 @@
 :root {
     --rad: .7rem;
     --dur: .3s;
-    --color-dark: #1c1b1b;
+    --color-dark: #121212;
     --color-light: #fff;
-    --color-brand: #ff0202;
+    --color-brand: #027cff;
     --font-fam: 'Lato', sans-serif;
     --height: 5rem;
     --btn-width: 6rem;
@@ -90,7 +90,7 @@ button {
     cursor: pointer;
     transition: background 0.3s ease, color 0.3s ease;
     &:hover {
-            background: #3f0808;
+            background: #0c3248;
           color: #f3eeee;
             /* Change text color on hover */
         }
