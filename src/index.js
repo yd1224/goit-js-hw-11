@@ -1,7 +1,7 @@
 import axios from "axios";
 const container = document.querySelector(".js-cat-list");
 const searchForm = document.querySelector(".search-form")
-
+container.classList.add("gallery")
 console.log(searchForm);
 searchForm.addEventListener("submit", handleSubmit)
 function handleSubmit(event) {
@@ -20,7 +20,7 @@ const observer = new IntersectionObserver(handlePagination, options)
         .then(data => {
             console.log(data);
             container.insertAdjacentHTML("beforeend", createMarkup(data.hits))
-
+let lightbox = new SimpleLightbox('.gallery a', { captionsData: "alt", captionDelay: 250, overlayOpacity: 0.5 });
             if(data.page < data.totalHits/40) { 
                    observer.observe(guard)
             }
@@ -28,18 +28,24 @@ const observer = new IntersectionObserver(handlePagination, options)
 }
 function createMarkup(arr) {
     return arr.map(({ webformatURL, largeImageURL, tags, likes, views, comments, downloads }) => `
-        <li class="cat-card gallery__item">
-         <a class="gallery__link" href="${largeImageURL}" rel="noopener" onclick="return false;" download>
-            <img class="cat-img gallery__image lazyload" data-src="${webformatURL}" alt="${tags}"/>
+        <li class="cat-card">
+         <div class="gallery__item">
+            <a class="gallery__link" href="${largeImageURL}" rel="noopener" onclick="return false;" download>
+            <img class="gallery__image lazyload"  data-src="${webformatURL}" alt="${tags}"/>
             </a>
-            <div class="cat-info">
-                <p>Likes: ${likes}</p>
+         </div>
+      
+         <div class="cat-info">
+                <p class="text">Likes: ${likes}</p>
                 <p>Views: ${views}</p>
                 <p>Comments: ${comments}</p>
                 <p>Downloads: ${downloads}</p>
             </div>
         </li>
     `).join("")
+  
+
+
 }
 
 function serviceCats(value, page=1) {
