@@ -42,8 +42,10 @@ html {
 // Main styles
 form {
     position: absolute;
+    position: fixed;
+    z-index: 1;
     /* Change to absolute positioning */
-    top: 0;
+    top: 10px;
     /* Position from the top */
     left: 0;
     /* Position from the left */

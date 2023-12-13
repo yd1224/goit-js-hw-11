@@ -1,15 +1,19 @@
 import axios from "axios";
+import Notiflix from 'notiflix'; 
 const container = document.querySelector(".js-cat-list");
 const searchForm = document.querySelector(".search-form")
+const guard = document.querySelector(".js-guard");
+let value=""
 container.classList.add("gallery")
-console.log(searchForm);
+console.log(container.firstElementChild);
 searchForm.addEventListener("submit", handleSubmit)
+  let page = 1;
 function handleSubmit(event) {
     event.preventDefault()
-    const value = searchForm.searchQuery.value.trim();
+    container.innerHTML = "";
+     value = searchForm.searchQuery.value.trim();
     console.log(value);
-    let page = 1;
-
+  
 const options = {
     root: null,
     rootMargin: "300px",
@@ -18,14 +22,27 @@ const options = {
 const observer = new IntersectionObserver(handlePagination, options)
     serviceCats(value, page)
         .then(data => {
+                if (data.totalHits === 0) {
+                throw new Error;
+            }
             console.log(data);
             container.insertAdjacentHTML("beforeend", createMarkup(data.hits))
-let lightbox = new SimpleLightbox('.gallery a', { captionsData: "alt", captionDelay: 250, overlayOpacity: 0.5 });
-            if(data.page < data.totalHits/40) { 
-                   observer.observe(guard)
+            let lightbox = new SimpleLightbox('.gallery a', { captionsData: "alt", captionDelay: 250, overlayOpacity: 0.5 });
+            smoothScrollGallery() 
+   
+            if(page < data.totalHits/40) { 
+                observer.observe(guard)
+                    console.log("ok");
             }
         })
+        .catch(() => 
+           Notiflix.Notify.failure(
+               ` Sorry, there are no images matching your search query. Please try again.`,
+           )
+    )
+   .finally(()=> searchForm.reset())
 }
+
 function createMarkup(arr) {
     return arr.map(({ webformatURL, largeImageURL, tags, likes, views, comments, downloads }) => `
         <li class="cat-card">
@@ -62,28 +79,66 @@ function serviceCats(value, page=1) {
     })
     return axios.get(`${BASE_URL}?${queryParams}`)
         .then(resp => {
-          console.log(resp.data.hits);
+            console.log(resp.data.hits);
+            console.log(resp.data);
+            // if (data.totalHits === 0) {
+            //     throw new Error;
+            // }
             return resp.data
         })
-        .catch(error => {
-            throw new Error(error)
-        })
+    //   .catch(() => 
+    //        Notiflix.Notify.failure(
+    //            ` Sorry, there are no images matching your search query. Please try again.`,
+    //        )
+    // )
 }
+
 function handlePagination(entries, observer) {
     entries.forEach((entry) => {
         console.log(entry);
         if(entry.isIntersecting) {
             console.log("ok");
             page += 1;
-            serviceCats(page)
+            serviceCats(value,page)
                 .then((data) => {
                     container.insertAdjacentHTML("beforeend", createMarkup(data.hits))
-
+            let lightbox = new SimpleLightbox('.gallery a', { captionsData: "alt", captionDelay: 250, overlayOpacity: 0.5 });
+            smoothScrollGallery() 
                     if(data.page >= data.totalHits/40) {
                         observer.unobserve(entry.target)
                     }
                 })
-                .catch(error => console.log(error))
+    //            .catch(() => 
+    //        Notiflix.Notify.failure(
+    //            ` Sorry, there are no images matching your search query. Please try again.`,
+    //        )
+    // )
         }
     })
+}
+// function getValue() {
+//    value = searchForm.searchQuery.value.trim();
+
+//     return value;
+// }
+
+let prevScrollPos = window.pageYOffset;
+
+window.addEventListener('scroll', () => {
+    const currentScrollPos = window.pageYOffset;
+    if (prevScrollPos > currentScrollPos) {
+        searchForm.classList.remove('hidden');
+    } else {
+        searchForm.classList.add('hidden');
+    }
+    prevScrollPos = currentScrollPos;
+});
+function smoothScrollGallery() {
+    const { height } = container.firstElementChild.getBoundingClientRect();
+
+window.scrollBy({
+  top: height * 2.5,
+  behavior: "smooth",
+});
+    console.log("QWERTY");
 }
