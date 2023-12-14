@@ -5,43 +5,58 @@ const searchForm = document.querySelector(".search-form")
 const guard = document.querySelector(".js-guard");
 let value=""
 container.classList.add("gallery")
-console.log(container.firstElementChild);
-searchForm.addEventListener("submit", handleSubmit)
-  let page = 1;
-function handleSubmit(event) {
-    event.preventDefault()
-    container.innerHTML = "";
-     value = searchForm.searchQuery.value.trim();
-    console.log(value);
-  
 const options = {
     root: null,
     rootMargin: "300px",
     threshold: 0
-}
-const observer = new IntersectionObserver(handlePagination, options)
-    serviceCats(value, page)
+};
+const observer = new IntersectionObserver(handlePagination, options);
+
+
+let page=1;
+// console.log("global",page);
+searchForm.addEventListener("submit", handleSubmit);
+
+function handleSubmit(event) {
+    event.preventDefault();
+    page = 1;
+    container.innerHTML = "";
+    value = searchForm.searchQuery.value.trim();
+
+    // Disconnect the observer before making a new request
+    observer.disconnect();
+
+    serviceCats(value)
         .then(data => {
-                if (data.totalHits === 0) {
-                throw new Error;
+            if (data.totalHits === 0) {
+                throw new Error();
             }
-            console.log(data);
-            container.insertAdjacentHTML("beforeend", createMarkup(data.hits))
+
+            container.insertAdjacentHTML("beforeend", createMarkup(data.hits));
             let lightbox = new SimpleLightbox('.gallery a', { captionsData: "alt", captionDelay: 250, overlayOpacity: 0.5 });
-            smoothScrollGallery() 
-   
-            if(page < data.totalHits/40) { 
-                observer.observe(guard)
-                    console.log("ok");
+            smoothScrollGallery();
+       console.log(page);
+                    console.log( Math.floor(data.totalHits / 40));
+            if (page < Math.floor(data.totalHits / 40)) {
+         console.log(page);
+                    console.log( Math.floor(data.totalHits / 40));
+                observer.observe(guard);
+            } else {
+                   Notiflix.Notify.info(
+                            `We're sorry, but you've reached the end of search results.`,
+                        );
             }
         })
-        .catch(() => 
-           Notiflix.Notify.failure(
-               ` Sorry, there are no images matching your search query. Please try again.`,
-           )
-    )
-   .finally(()=> searchForm.reset())
+        .catch(() =>
+            Notiflix.Notify.failure(
+                ` Sorry, there are no images matching your search query. Please try again.`,
+            )
+        )
+        .finally(() => searchForm.reset());
 }
+
+
+
 
 function createMarkup(arr) {
     return arr.map(({ webformatURL, largeImageURL, tags, likes, views, comments, downloads }) => `
@@ -77,13 +92,14 @@ function serviceCats(value, page=1) {
         page: page,
         per_page: "40"
     })
+      console.log("service", page);
     return axios.get(`${BASE_URL}?${queryParams}`)
         .then(resp => {
-            console.log(resp.data.hits);
-            console.log(resp.data);
-            // if (data.totalHits === 0) {
+   
+            // if (data.totalHits === 0) {  
             //     throw new Error;
             // }
+            console.log("1234567890--098765432345");
             return resp.data
         })
     //   .catch(() => 
@@ -93,34 +109,42 @@ function serviceCats(value, page=1) {
     // )
 }
 
-function handlePagination(entries, observer) {
+
+
+
+
+
+
+function handlePagination(entries) {
     entries.forEach((entry) => {
-        console.log(entry);
-        if(entry.isIntersecting) {
-            console.log("ok");
+        if (entry.isIntersecting) {
             page += 1;
-            serviceCats(value,page)
+            console.log("pagination", page);
+
+            serviceCats(value, page)
                 .then((data) => {
-                    container.insertAdjacentHTML("beforeend", createMarkup(data.hits))
-            let lightbox = new SimpleLightbox('.gallery a', { captionsData: "alt", captionDelay: 250, overlayOpacity: 0.5 });
-            smoothScrollGallery() 
-                    if(data.page >= data.totalHits/40) {
-                        observer.unobserve(entry.target)
+                    container.insertAdjacentHTML("beforeend", createMarkup(data.hits));
+                    let lightbox = new SimpleLightbox('.gallery a', { captionsData: "alt", captionDelay: 250, overlayOpacity: 0.5 });
+                    smoothScrollGallery();
+                    console.log(page);
+                    console.log( Math.floor(data.totalHits / 40));
+                    if (page >= Math.floor(data.totalHits / 40)) {
+                        observer.unobserve(entry.target);
+                        Notiflix.Notify.info(
+                            `We're sorry, but you've reached the end of search results.`,
+                        );
                     }
                 })
-    //            .catch(() => 
-    //        Notiflix.Notify.failure(
-    //            ` Sorry, there are no images matching your search query. Please try again.`,
-    //        )
-    // )
+                .catch(() => {
+                    // Handle error during pagination
+                });
         }
-    })
+    });
 }
-// function getValue() {
-//    value = searchForm.searchQuery.value.trim();
 
-//     return value;
-// }
+// ... (remaining code)
+
+
 
 let prevScrollPos = window.pageYOffset;
 
@@ -140,5 +164,5 @@ window.scrollBy({
   top: height * 2.5,
   behavior: "smooth",
 });
-    console.log("QWERTY");
+
 }
