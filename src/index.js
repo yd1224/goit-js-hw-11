@@ -37,7 +37,7 @@ function handleSubmit(event) {
             smoothScrollGallery();
        console.log(page);
                     console.log( Math.floor(data.totalHits / 40));
-            if (page < Math.floor(data.totalHits / 40)) {
+            if (page <= Math.floor(data.totalHits / 40)) {
          console.log(page);
                     console.log( Math.floor(data.totalHits / 40));
                 observer.observe(guard);
@@ -166,3 +166,6 @@ window.scrollBy({
 });
 
 }
+
+
+
